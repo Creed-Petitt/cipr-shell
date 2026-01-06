@@ -96,12 +96,11 @@ int Parser::primary() {
         const int expr = expression();
         consume(RIGHT_PAREN, "Expect ')' after expression.");
 
-        return arena.addNode(NodeType::GROUPING, previous(), std::monostate{}, expr);
+        return arena.addNode(NodeType::GROUPING, previous(), std::monostate{}, -1, expr);
     }
 
-    throw std::runtime_error("Expect expression at '" + peek().lexeme + "'");
+    throw error(peek(), "Expect expression.");
 }
-
 
 bool Parser::match(const std::initializer_list<TokenType> types) {
     for (const TokenType type : types) {
