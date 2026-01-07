@@ -84,9 +84,12 @@ int Parser::unary() {
 }
 
 int Parser::primary() {
-    if (match({FALSE})) return arena.addNode(NodeType::LITERAL, previous(), false);
-    if (match({TRUE}))  return arena.addNode(NodeType::LITERAL, previous(), true);
-    if (match({NIL}))   return arena.addNode(NodeType::LITERAL, previous(), std::monostate{});
+    if (match({FALSE}))
+        return arena.addNode(NodeType::LITERAL, previous(), false);
+    if (match({TRUE}))
+        return arena.addNode(NodeType::LITERAL, previous(), true);
+    if (match({TOK_NULL}))
+        return arena.addNode(NodeType::LITERAL, previous(), std::monostate{});
 
     if (match({NUMBER, STRING})) {
         return arena.addNode(NodeType::LITERAL, previous(), previous().literal);

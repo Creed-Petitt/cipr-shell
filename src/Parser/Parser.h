@@ -45,7 +45,7 @@ private:
 
     Token consume(TokenType type, const std::string& message);
 
-    ParseError error(const Token& token, const std::string& message);
+    static ParseError error(const Token& token, const std::string& message);
 };
 
 #endif //CIPR_PARSER_H
