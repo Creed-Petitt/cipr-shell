@@ -39,14 +39,6 @@ std::vector<Token> Scanner::scanTokens() {
     return tokens;
 }
 
-bool Scanner::isAtEnd() const {
-    return current >= source_.length();
-}
-
-char Scanner::advance()  {
-    return source_[current++];
-}
-
 void Scanner::addToken(const TokenType type) {
     addToken(type, std::monostate{});
 }
@@ -58,7 +50,7 @@ void Scanner::addToken(TokenType type, const Literal& literal) {
 }
 
 void Scanner::scanToken() {
-    switch (char c = advance()) {
+    switch (const char c = advance()) {
         case '(': addToken(LEFT_PAREN); break;
         case ')': addToken(RIGHT_PAREN); break;
         case '{': addToken(LEFT_BRACE); break;
@@ -77,7 +69,8 @@ void Scanner::scanToken() {
 
         case '/':
             if (match('/')) {
-                while (peek() != '\n' && !isAtEnd()) advance();
+                while (peek() != '\n' && !isAtEnd())
+                    advance();
             } else {
                 addToken(SLASH);
             }
@@ -92,7 +85,9 @@ void Scanner::scanToken() {
             line++;
             break;
 
-        case '"': string(); break;
+        case '"':
+            string();
+            break;
 
         default:
             if (isDigit(c)) {
@@ -106,11 +101,21 @@ void Scanner::scanToken() {
     }
 }
 
-bool Scanner::match(char expected) {
-    if (isAtEnd()) return false;
-    if (source_[current] != expected) return false;
+bool Scanner::isAtEnd() const {
+    return current >= source_.length();
+}
 
-    current++; // Only move forward if it's the character we expected
+char Scanner::advance()  {
+    return source_[current++];
+}
+
+bool Scanner::match(const char expected) {
+    if (isAtEnd())
+        return false;
+    if (source_[current] != expected)
+        return false;
+
+    current++; // Only move forward if it's the character expected
     return true;
 }
 
@@ -126,7 +131,8 @@ char Scanner::peekNext() const {
 
 void Scanner::string() {
     while (peek() != '"' && !isAtEnd()) {
-        if (peek() == '\n') line++;
+        if (peek() == '\n')
+            line++;
         advance();
     }
 
@@ -141,7 +147,7 @@ void Scanner::string() {
     addToken(STRING, value);
 }
 
-bool Scanner::isDigit(char c)  {
+bool Scanner::isDigit(const char c)  {
     return c >= '0' && c <= '9';
 }
 
@@ -153,25 +159,27 @@ void Scanner::number()  {
     if (peek() == '.' && isDigit(peekNext())) {
         advance();
 
-        while (isDigit(peek())) advance();
+        while (isDigit(peek()))
+            advance();
     }
 
     double value = std::stod(source_.substr(start, current - start));
     addToken(NUMBER, value);
 }
 
-bool Scanner::isAlpha(char c) {
+bool Scanner::isAlpha(const char c) {
     return (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z') ||
             c == '_';
 }
 
-bool Scanner::isAlphaNumeric(char c) {
+bool Scanner::isAlphaNumeric(const char c) {
     return isAlpha(c) || isDigit(c);
 }
 
 void Scanner::identifier() {
-    while (isAlphaNumeric(peek())) advance();
+    while (isAlphaNumeric(peek()))
+        advance();
 
     const std::string text = source_.substr(start, current - start);
 
