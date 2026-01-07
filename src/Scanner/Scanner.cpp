@@ -8,16 +8,15 @@
 #include "../Core/Core.h"
 
 const std::unordered_map<std::string, TokenType> Scanner::keywords = {
-    {"and",    AND},
     {"class",  CLASS},
     {"else",   ELSE},
     {"false",  FALSE},
     {"for",    FOR},
     {"fn",     FN},
     {"if",     IF},
-    {"nil",    NIL},
-    {"or",     OR},
-    {"print",  PRINT},
+    {"null",   TOK_NULL},
+    {"none",   TOK_NULL},
+    {"echo",   ECHO},
     {"return", RETURN},
     {"super",  SUPER},
     {"this",   THIS},
@@ -66,6 +65,24 @@ void Scanner::scanToken() {
         case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
         case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
         case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
+
+        case '&' :
+            if (match('&')) {
+                addToken(AND);
+                break;
+            }
+
+            Core::error(line, "Unexpected character: '&'. Did you mean '&&'?");
+            break;
+
+        case '|' :
+            if (match('|')) {
+                addToken(OR);
+                break;
+            }
+
+            Core::error(line, "Unexpected character: '|'. Did you mean '||'?");
+            break;
 
         case '/':
             if (match('/')) {
