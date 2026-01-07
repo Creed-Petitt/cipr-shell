@@ -12,8 +12,8 @@ std::string tokenTypeName(const TokenType type) {
         "BANG", "BANG_EQUAL", "EQUAL", "EQUAL_EQUAL",
         "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
         "IDENTIFIER", "STRING", "NUMBER",
-        "AND", "CLASS", "ELSE", "FALSE", "FN", "FOR", "IF", "NIL", "OR",
-        "PRINT", "RETURN", "SUPER", "THIS", "TRUE", "LET", "WHILE",
+        "AND", "CLASS", "ELSE", "FALSE", "FN", "FOR", "IF", "TOK_NULL", "OR",
+        "ECHO", "RETURN", "SUPER", "THIS", "TRUE", "LET", "WHILE",
         "EOF_TOKEN"
     };
     return names[type];
