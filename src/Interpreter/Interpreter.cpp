@@ -13,6 +13,38 @@ void Interpreter::interpret(const int rootIndex) {
     }
 }
 
+void Interpreter::execute(const int index) {
+    switch (const Node& node = arena.get(index); node.type) {
+        case NodeType::STMT_LIST:
+            visitStmtList(node);
+            break;
+        case NodeType::STMT_ECHO:
+            visitEchoStmt(node);
+            break;
+        case NodeType::STMT_EXPR:
+            visitExpressionStmt(node);
+            break;
+        default:
+            evaluate(index);
+            break;
+    }
+}
+
+void Interpreter::visitStmtList(const Node& node) {
+    for (const int childIndex : node.children) {
+        execute(childIndex);
+    }
+}
+
+void Interpreter::visitEchoStmt(const Node& node) {
+    const Literal value = evaluate(node.children[0]);
+    std::cout << stringify(value) << std::endl;
+}
+
+void Interpreter::visitExpressionStmt(const Node& node) {
+    evaluate(node.children[0]);
+}
+
 Literal Interpreter::evaluate(const int index) {
     if (index == -1)
         return std::monostate{};
@@ -148,30 +180,4 @@ std::string Interpreter::stringify(const Literal& value) {
 
     if (std::holds_alternative<std::string>(value)) return std::get<std::string>(value);
     return "unknown";
-}
-
-void Interpreter::execute(const int index) {
-    const Node& node = arena.get(index);
-
-    switch (node.type) {
-        case NodeType::STMT_LIST:
-            for (const int childIndex : node.children) {
-                execute(childIndex);
-            }
-            break;
-
-        case NodeType::STMT_ECHO: {
-            const Literal value = evaluate(node.children[0]);
-            std::cout << stringify(value) << std::endl;
-            break;
-        }
-
-        case NodeType::STMT_EXPR:
-            evaluate(node.children[0]);
-            break;
-
-        default:
-            evaluate(index);
-            break;
-    }
 }
