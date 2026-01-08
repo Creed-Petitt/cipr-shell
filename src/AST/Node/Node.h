@@ -15,25 +15,28 @@ enum class NodeType {
     BINARY,
     GROUPING,
     LITERAL,
-    UNARY
+    UNARY,
+    STATEMENT,
+    EXPRESSION
 };
 
 struct Node {
     NodeType type;
     Token op;
     Literal value;
-    int left = -1;
-    int right = -1;
 
-    Node(const NodeType type, Token op, Literal value, const int left, const int right)
+    std::vector<int> children;
+
+    Node(const NodeType type, Token op, Literal value, std::vector<int> children)
         : type(type), op(std::move(op)), value(std::move(value)),
-          left(left), right(right) {}
+          children(std::move(children)) {}
 };
 
 class Arena {
 public:
-    int addNode(NodeType type, Token op, Literal value, int left = -1, int right = -1) {
-        nodes.emplace_back(type, std::move(op), std::move(value), left, right);
+    int addNode(NodeType type, Token op, Literal value, const std::initializer_list<int> children) {
+        nodes.emplace_back(type, std::move(op), std::move(value), std::move(children));
+
         return static_cast<int>(nodes.size()) - 1;
     }
 

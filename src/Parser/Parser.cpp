@@ -33,7 +33,8 @@ int Parser::equality() {
         const Token op = previous();
         const int rightIndex = comparison();
 
-        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},leftIndex, rightIndex);
+        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},
+            {leftIndex, rightIndex});
     }
 
     return leftIndex;
@@ -46,7 +47,8 @@ int Parser::comparison() {
         const Token op = previous();
         const int rightIndex = term();
 
-        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},leftIndex, rightIndex);
+        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},
+            {leftIndex, rightIndex});
     }
 
     return leftIndex;
@@ -59,7 +61,8 @@ int Parser::term() {
         const Token op = previous();
         const int rightIndex = factor();
 
-        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},leftIndex, rightIndex);
+        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},
+            {leftIndex, rightIndex});
     }
 
     return leftIndex;
@@ -72,7 +75,8 @@ int Parser::factor() {
         const Token op = previous();
         const int rightIndex = unary();
 
-        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},leftIndex, rightIndex);
+        leftIndex = arena.addNode(NodeType::BINARY, op, std::monostate{},
+            {leftIndex, rightIndex});
     }
 
     return leftIndex;
@@ -83,7 +87,8 @@ int Parser::unary() {
         const Token op = previous();
         const int rightIndex = unary();
 
-        return arena.addNode(NodeType::UNARY, op, std::monostate{}, -1,rightIndex);
+        return arena.addNode(NodeType::UNARY, op, std::monostate{},
+            {rightIndex});
     }
 
     return primary();
@@ -91,21 +96,21 @@ int Parser::unary() {
 
 int Parser::primary() {
     if (match({FALSE}))
-        return arena.addNode(NodeType::LITERAL, previous(), false);
+        return arena.addNode(NodeType::LITERAL, previous(), false, {});
     if (match({TRUE}))
-        return arena.addNode(NodeType::LITERAL, previous(), true);
+        return arena.addNode(NodeType::LITERAL, previous(), true, {});
     if (match({TOK_NULL}))
-        return arena.addNode(NodeType::LITERAL, previous(), std::monostate{});
+        return arena.addNode(NodeType::LITERAL, previous(), std::monostate{}, {});
 
     if (match({NUMBER, STRING})) {
-        return arena.addNode(NodeType::LITERAL, previous(), previous().literal);
+        return arena.addNode(NodeType::LITERAL, previous(), previous().literal, {});
     }
 
     if (match({LEFT_PAREN})) {
         const int expr = expression();
         consume(RIGHT_PAREN, "Expect ')' after expression.");
 
-        return arena.addNode(NodeType::GROUPING, previous(), std::monostate{}, -1, expr);
+        return arena.addNode(NodeType::GROUPING, previous(), std::monostate{}, {expr});
     }
 
     throw error(peek(), "Expect expression.");

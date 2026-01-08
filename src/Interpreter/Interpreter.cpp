@@ -3,11 +3,20 @@
 //
 
 #include "Interpreter.h"
-
 #include "RuntimeError.h"
 
+void Interpreter::interpret(const int rootIndex) {
+    try {
+        const Literal value = evaluate(rootIndex);
+        std::cout << stringify(value) << std::endl;
+    } catch (const RuntimeError& error) {
+        std::cerr << "Runtime Error: " << error.what() << "\n[line " << error.token.line << "]" << std::endl;
+    }
+}
+
 Literal Interpreter::evaluate(const int index) {
-    if (index == -1) return std::monostate{};
+    if (index == -1)
+        return std::monostate{};
 
     switch (const Node& node = arena.get(index); node.type) {
         case NodeType::LITERAL:
@@ -28,11 +37,11 @@ Literal Interpreter::visitLiteral(const Node& node) {
 }
 
 Literal Interpreter::visitGrouping(const Node& node) {
-    return evaluate(node.right);
+    return evaluate(node.children[0]);
 }
 
 Literal Interpreter::visitUnary(const Node& node) {
-    const Literal right = evaluate(node.right);
+    const Literal right = evaluate(node.children[0]);
 
     switch (node.op.type) {
         case MINUS:
@@ -48,8 +57,8 @@ Literal Interpreter::visitUnary(const Node& node) {
 }
 
 Literal Interpreter::visitBinary(const Node& node) {
-    const Literal left = evaluate(node.left);
-    const Literal right = evaluate(node.right);
+    const Literal left = evaluate(node.children[0]);
+    const Literal right = evaluate(node.children[1]);
 
     switch (node.op.type) {
         case MINUS:
@@ -69,9 +78,10 @@ Literal Interpreter::visitBinary(const Node& node) {
             if (std::holds_alternative<double>(left) && std::holds_alternative<double>(right)) {
                 return std::get<double>(left) + std::get<double>(right);
             }
-            if (std::holds_alternative<std::string>(left) && std::holds_alternative<std::string>(right)) {
-                return std::get<std::string>(left) + std::get<std::string>(right);
+            if (std::holds_alternative<std::string>(left) || std::holds_alternative<std::string>(right)) {
+                return stringify(left) + stringify(right);
             }
+
             throw RuntimeError(node.op, "Operands must be two numbers or two strings.");
 
         case GREATER:
@@ -126,17 +136,8 @@ bool Interpreter::isEqual(const Literal& a, const Literal& b) {
     return a == b;
 }
 
-void Interpreter::interpret(const int rootIndex) {
-    try {
-        const Literal value = evaluate(rootIndex);
-        std::cout << stringify(value) << std::endl;
-    } catch (const RuntimeError& error) {
-        std::cerr << "Runtime Error: " << error.what() << "\n[line " << error.token.line << "]" << std::endl;
-    }
-}
-
 std::string Interpreter::stringify(const Literal& value) {
-    if (std::holds_alternative<std::monostate>(value)) return "nil";
+    if (std::holds_alternative<std::monostate>(value)) return "null";
     if (std::holds_alternative<bool>(value)) return std::get<bool>(value) ? "true" : "false";
 
     if (std::holds_alternative<double>(value)) {

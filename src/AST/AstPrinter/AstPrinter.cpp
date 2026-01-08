@@ -26,11 +26,11 @@ std::string AstPrinter::print(const int nodeIdx) {
             return "";
         }
         case NodeType::UNARY:
-            return parenthesize(node.op.lexeme, {node.right});
+            return parenthesize(node.op.lexeme, {node.children[0]});
         case NodeType::BINARY:
-            return parenthesize(node.op.lexeme, {node.left, node.right});
+            return parenthesize(node.op.lexeme, {node.children[0], node.children[1]});
         case NodeType::GROUPING:
-            return parenthesize("group", {node.right});
+            return parenthesize("group", {node.children[0]});
     }
     return "";
 }
