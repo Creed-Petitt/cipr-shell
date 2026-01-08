@@ -10,7 +10,7 @@ std::string AstPrinter::print(const int nodeIdx) {
     switch (Node& node = arena.get(nodeIdx); node.type) {
         case NodeType::LITERAL: {
             if (std::holds_alternative<std::monostate>(node.value))
-                return "nil";
+                return "null";
 
             if (std::holds_alternative<double>(node.value)) {
                 std::string s = std::to_string(std::get<double>(node.value));
@@ -30,7 +30,7 @@ std::string AstPrinter::print(const int nodeIdx) {
         case NodeType::BINARY:
             return parenthesize(node.op.lexeme, {node.left, node.right});
         case NodeType::GROUPING:
-            return parenthesize("group", {node.left});
+            return parenthesize("group", {node.right});
     }
     return "";
 }
