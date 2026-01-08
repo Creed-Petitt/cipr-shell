@@ -10,7 +10,13 @@
 
 int Parser::parse() {
     try {
-        return expression();
+        const int result = expression();
+
+        if (!isAtEnd()) {
+            throw error(peek(), "Expected EOF, found extra tokens.");
+        }
+
+        return result;
     } catch (const ParseError& error) {
         return -1;
     }
