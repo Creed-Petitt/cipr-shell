@@ -27,10 +27,37 @@ void Interpreter::execute(const int index) {
         case NodeType::STMT_EXPR:
             visitExpressionStmt(node);
             break;
+        case NodeType::STMT_BLOCK:
+            visitBlockStmt(node);
+            break;
         default:
             evaluate(index);
             break;
     }
+}
+
+void Interpreter::executeBlock(const std::vector<int>& statements,
+    const std::shared_ptr<Environment> &env) {
+
+    const std::shared_ptr<Environment> previous = this->environment;
+
+    try {
+        this->environment = env;
+           for (const int index : statements) {
+               execute(index);
+             }
+    } catch (...) {
+        this->environment = previous;
+        throw;
+    }
+
+    this->environment = previous;
+}
+
+void Interpreter::visitBlockStmt(const Node& node) {
+    const auto blockEnv = std::make_shared<Environment>(environment);
+
+    executeBlock(node.children, blockEnv);
 }
 
 void Interpreter::visitStmtList(const Node& node) {

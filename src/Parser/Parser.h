@@ -31,6 +31,7 @@ private:
 
     int declaration();
     int varDeclaration();
+    std::vector<int> block();
     int assignment();
     int statement();
     int echoStatement();

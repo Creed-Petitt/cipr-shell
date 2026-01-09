@@ -18,13 +18,25 @@ int Parser::parse() {
     return arena.addNode(NodeType::STMT_LIST, previous(), previous().literal, statements);
 }
 
+std::vector<int> Parser::block() {
+    std::vector<int> statements;
+
+    while (!check(RIGHT_BRACE) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+
+    consume(RIGHT_BRACE, "Expect '}' after block.");
+
+    return statements;
+}
+
 int Parser::declaration() {
     try {
         if (match({LET})) {
             return varDeclaration();
         }
         return statement();
-    } catch (const ParseError& e) {
+    } catch ([[maybe_unused]] const ParseError& e) {
         synchronize();
         return -1;
     }
@@ -34,6 +46,12 @@ int Parser::statement() {
     if (match({ECHO})) {
         return echoStatement();
     }
+
+    if (match({LEFT_BRACE})) {
+        const std::vector<int> statements = block();
+        return arena.addNode(NodeType::STMT_BLOCK, previous(), std::monostate{}, statements);
+    }
+
 
     return expressionStatement();
 }

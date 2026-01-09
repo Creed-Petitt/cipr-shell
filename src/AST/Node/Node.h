@@ -22,6 +22,7 @@ enum class NodeType {
     STMT_ECHO,
     STMT_EXPR,
     STMT_VAR_DECL,
+    STMT_BLOCK,
 };
 
 struct Node {

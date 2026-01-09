@@ -23,6 +23,8 @@ private:
 
     Literal evaluate(int index);
     void execute(int index);
+    void executeBlock(const std::vector<int>& statements,
+        const std::shared_ptr<Environment> &env);
 
     static Literal visitLiteral(const Node& node);
     Literal visitUnary(const Node& node);
@@ -31,6 +33,7 @@ private:
     Literal visitVarExpr(const Node& node) const;
     Literal visitAssignmentExpr(const Node& node);
 
+    void visitBlockStmt(const Node& node);
     void visitEchoStmt(const Node& node);
     void visitExpressionStmt(const Node& node);
     void visitStmtList(const Node& node);
