@@ -31,14 +31,20 @@ private:
 
     int declaration();
     int varDeclaration();
+
     std::vector<int> block();
-    int assignment();
+    int consumeBlock(const std::string& errorMessage);
+
+    int ifStatement();
     int statement();
     int echoStatement();
     int expressionStatement();
 
+    int assignment();
     int expression();
     int equality();
+    int logical_or();
+    int logical_and();
     int comparison();
     int term();
     int factor();

@@ -32,8 +32,10 @@ private:
     Literal visitGrouping(const Node& node);
     Literal visitVarExpr(const Node& node) const;
     Literal visitAssignmentExpr(const Node& node);
+    Literal visitLogicalExpr(const Node& node);
 
     void visitBlockStmt(const Node& node);
+    void visitIfStmt(const Node& node);
     void visitEchoStmt(const Node& node);
     void visitExpressionStmt(const Node& node);
     void visitStmtList(const Node& node);

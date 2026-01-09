@@ -47,6 +47,10 @@ int Parser::statement() {
         return echoStatement();
     }
 
+    if (match({IF})) {
+        return ifStatement();
+    }
+
     if (match({LEFT_BRACE})) {
         const std::vector<int> statements = block();
         return arena.addNode(NodeType::STMT_BLOCK, previous(), std::monostate{}, statements);
@@ -69,6 +73,31 @@ int Parser::varDeclaration() {
     return arena.addNode(NodeType::STMT_VAR_DECL, name, std::monostate{}, {initializer});
 }
 
+int Parser::consumeBlock(const std::string& errorMessage) {
+    if (match({LEFT_BRACE})) {
+        const std::vector<int> statements = block();
+        return arena.addNode(NodeType::STMT_BLOCK, previous(), std::monostate{},
+            statements);
+    }
+    throw error(peek(), errorMessage);
+}
+
+int Parser::ifStatement() {
+    consume(LEFT_PAREN, "Expect '(' after if statement.");
+    int condition = expression();
+    consume(RIGHT_PAREN, "Expect ')' after if statement.");
+
+    int thenBranch = consumeBlock("Expect '{' after if condition.");
+
+    int elseBranch = -1;
+    if (match({ELSE})) {
+        elseBranch = consumeBlock("Expect '{' after else.");
+    }
+
+    return arena.addNode(NodeType::STMT_IF, previous(), std::monostate{},
+        {condition, thenBranch, elseBranch});
+}
+
 int Parser::echoStatement() {
     int expr = expression();
     consume(SEMICOLON, "Expected ';' after value");
@@ -88,7 +117,7 @@ int Parser::expression() {
 }
 
 int Parser::assignment() {
-    const int expr = equality();
+    const int expr = logical_or();
 
     if (match({EQUAL})) {
         const Token equals = previous();
@@ -107,6 +136,32 @@ int Parser::assignment() {
     }
 
     return expr;
+}
+
+int Parser::logical_or() {
+    int left = logical_and();
+
+    while (match({OR})) {
+        const Token op = previous();
+        int right = logical_and();
+        left = arena.addNode(NodeType::LOGICAL, op, std::monostate{},
+            {left, right});
+    }
+
+    return left;
+}
+
+int Parser::logical_and() {
+    int left = equality();
+
+    while (match({AND})) {
+        const Token op = previous();
+        int right = equality();
+        left = arena.addNode(NodeType::LOGICAL, op, std::monostate{},
+            {left, right});
+    }
+
+    return left;
 }
 
 int Parser::equality() {

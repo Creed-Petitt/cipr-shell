@@ -45,6 +45,10 @@ std::string AstPrinter::print(const int nodeIdx) {
             return node.op.lexeme;
         case NodeType::ASSIGN:
             return parenthesize("assign " + node.op.lexeme, node.children);
+        case NodeType::LOGICAL:
+            return parenthesize(node.op.lexeme, {node.children[0], node.children[1]});
+        case NodeType::STMT_IF:
+            return parenthesize("if", node.children);
     }
     return "";
 }

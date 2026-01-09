@@ -30,6 +30,9 @@ void Interpreter::execute(const int index) {
         case NodeType::STMT_BLOCK:
             visitBlockStmt(node);
             break;
+        case NodeType::STMT_IF:
+            visitIfStmt(node);
+            break;
         default:
             evaluate(index);
             break;
@@ -60,6 +63,14 @@ void Interpreter::visitBlockStmt(const Node& node) {
     executeBlock(node.children, blockEnv);
 }
 
+void Interpreter::visitIfStmt(const Node& node) {
+    if (isTruthy(evaluate(node.children[0]))) {
+        execute(node.children[1]);
+    } else if (node.children[2] != -1) {
+        execute(node.children[2]);
+    }
+}
+
 void Interpreter::visitStmtList(const Node& node) {
     for (const int childIndex : node.children) {
         execute(childIndex);
@@ -84,16 +95,6 @@ void Interpreter::visitVarDeclaration(const Node &node) {
     environment->define(node.op.lexeme, value);
 }
 
-Literal Interpreter::visitVarExpr(const Node &node) const {
-    return environment->get(node.op);
-}
-
-Literal Interpreter::visitAssignmentExpr(const Node &node) {
-    Literal value = evaluate(node.children[0]);
-    environment->assign(node.op, value);
-    return value;
-}
-
 
 Literal Interpreter::evaluate(const int index) {
     if (index == -1)
@@ -104,6 +105,8 @@ Literal Interpreter::evaluate(const int index) {
             return visitVarExpr(node);
         case NodeType::ASSIGN:
            return visitAssignmentExpr(node);
+        case NodeType::LOGICAL:
+            return visitLogicalExpr(node);
         case NodeType::LITERAL:
             return visitLiteral(node);
         case NodeType::GROUPING:
@@ -115,6 +118,32 @@ Literal Interpreter::evaluate(const int index) {
         default:
             return std::monostate{};
     }
+}
+
+Literal Interpreter::visitLogicalExpr(const Node &node) {
+    Literal left = evaluate(node.children[0]);
+
+    if (node.op.type == OR) {
+        if (isTruthy(left))
+            return left;
+    }
+
+    if (node.op.type == AND) {
+        if (!isTruthy(left))
+            return left;
+    }
+
+    return evaluate(node.children[1]);
+}
+
+Literal Interpreter::visitVarExpr(const Node &node) const {
+    return environment->get(node.op);
+}
+
+Literal Interpreter::visitAssignmentExpr(const Node &node) {
+    Literal value = evaluate(node.children[0]);
+    environment->assign(node.op, value);
+    return value;
 }
 
 Literal Interpreter::visitLiteral(const Node& node) {
