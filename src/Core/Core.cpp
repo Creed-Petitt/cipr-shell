@@ -49,6 +49,9 @@ void Core::run(const std::string& source) {
     if (hadError)
         return;
 
+    AstPrinter printer(arena);
+    std::cout << "AST: " << printer.print(rootIndex) << std::endl;
+
     Interpreter interpreter(arena);
     interpreter.interpret(rootIndex);
 }

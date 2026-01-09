@@ -31,6 +31,20 @@ std::string AstPrinter::print(const int nodeIdx) {
             return parenthesize(node.op.lexeme, {node.children[0], node.children[1]});
         case NodeType::GROUPING:
             return parenthesize("group", {node.children[0]});
+        case NodeType::STMT_LIST:
+            return parenthesize("list", node.children);
+        case NodeType::STMT_ECHO:
+            return parenthesize("echo", {node.children[0]});
+        case NodeType::STMT_EXPR:
+            return parenthesize("expr", {node.children[0]});
+        case NodeType::STMT_BLOCK:
+            return parenthesize("block", node.children);
+        case NodeType::STMT_VAR_DECL:
+            return parenthesize("var " + node.op.lexeme, node.children);
+        case NodeType::VAR_EXPR:
+            return node.op.lexeme;
+        case NodeType::ASSIGN:
+            return parenthesize("assign " + node.op.lexeme, node.children);
     }
     return "";
 }
