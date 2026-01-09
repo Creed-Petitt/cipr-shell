@@ -6,16 +6,21 @@
 #define CIPR_INTERPRETER_H
 
 #include "../AST/Node/Node.h"
+#include "../Environment/Environment.h"
 #include <iostream>
 
 class Interpreter {
 public:
-    explicit Interpreter(Arena& arena) : arena(arena) {}
+    explicit Interpreter(Arena& arena) : arena(arena) {
+        environment = std::make_shared<Environment>();
+    }
 
     void interpret(int rootIndex);
 
 private:
     Arena& arena;
+    std::shared_ptr<Environment> environment;
+
     Literal evaluate(int index);
     void execute(int index);
 
@@ -23,10 +28,14 @@ private:
     Literal visitUnary(const Node& node);
     Literal visitBinary(const Node& node);
     Literal visitGrouping(const Node& node);
+    Literal visitVarExpr(const Node& node) const;
+    Literal visitAssignmentExpr(const Node& node);
 
     void visitEchoStmt(const Node& node);
     void visitExpressionStmt(const Node& node);
     void visitStmtList(const Node& node);
+    void visitVarDeclaration(const Node& node);
+
 
     static bool isTruthy(const Literal& value);
     static bool isEqual(const Literal& a, const Literal& b);

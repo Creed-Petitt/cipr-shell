@@ -16,11 +16,12 @@ enum class NodeType {
     GROUPING,
     LITERAL,
     UNARY,
+    ASSIGN,
+    VAR_EXPR,
     STMT_LIST,
     STMT_ECHO,
     STMT_EXPR,
     STMT_VAR_DECL,
-    VAR_EXPR
 };
 
 struct Node {

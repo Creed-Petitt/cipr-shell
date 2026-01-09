@@ -31,6 +31,7 @@ private:
 
     int declaration();
     int varDeclaration();
+    int assignment();
     int statement();
     int echoStatement();
     int expressionStatement();

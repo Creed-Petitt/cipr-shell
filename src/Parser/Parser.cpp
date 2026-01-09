@@ -41,14 +41,14 @@ int Parser::statement() {
 int Parser::varDeclaration() {
     const Token name = consume(IDENTIFIER, "Expect variable name.");
 
-    int init = -1;
+    int initializer = -1;
     if (match({EQUAL})) {
-        init = expression();
+        initializer = expression();
     }
 
     consume(SEMICOLON, "Expected ';' after declaration");
 
-    return arena.addNode(NodeType::STMT_VAR_DECL, previous(), previous().literal, {init});
+    return arena.addNode(NodeType::STMT_VAR_DECL, name, std::monostate{}, {initializer});
 }
 
 int Parser::echoStatement() {
@@ -66,7 +66,29 @@ int Parser::expressionStatement() {
 }
 
 int Parser::expression() {
-    return equality();
+    return assignment();
+}
+
+int Parser::assignment() {
+    const int expr = equality();
+
+    if (match({EQUAL})) {
+        const Token equals = previous();
+
+        int value = assignment();
+
+        const Node& leftNode = arena.get(expr);
+
+        if (leftNode.type == NodeType::VAR_EXPR) {
+            const Token name= leftNode.op;
+
+            return arena.addNode(NodeType::ASSIGN, name, std::monostate{}, {value});
+        }
+
+        error(equals, "Invalid assignment target.");
+    }
+
+    return expr;
 }
 
 int Parser::equality() {

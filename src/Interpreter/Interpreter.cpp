@@ -18,6 +18,9 @@ void Interpreter::execute(const int index) {
         case NodeType::STMT_LIST:
             visitStmtList(node);
             break;
+        case NodeType::STMT_VAR_DECL:
+            visitVarDeclaration(node);
+            break;
         case NodeType::STMT_ECHO:
             visitEchoStmt(node);
             break;
@@ -45,11 +48,35 @@ void Interpreter::visitExpressionStmt(const Node& node) {
     evaluate(node.children[0]);
 }
 
+void Interpreter::visitVarDeclaration(const Node &node) {
+    Literal value = std::monostate{};
+
+    if (!node.children.empty() && node.children[0] != -1) {
+        value = evaluate(node.children[0]);
+    }
+    environment->define(node.op.lexeme, value);
+}
+
+Literal Interpreter::visitVarExpr(const Node &node) const {
+    return environment->get(node.op);
+}
+
+Literal Interpreter::visitAssignmentExpr(const Node &node) {
+    Literal value = evaluate(node.children[0]);
+    environment->assign(node.op, value);
+    return value;
+}
+
+
 Literal Interpreter::evaluate(const int index) {
     if (index == -1)
         return std::monostate{};
 
     switch (const Node& node = arena.get(index); node.type) {
+        case NodeType::VAR_EXPR:
+            return visitVarExpr(node);
+        case NodeType::ASSIGN:
+           return visitAssignmentExpr(node);
         case NodeType::LITERAL:
             return visitLiteral(node);
         case NodeType::GROUPING:
