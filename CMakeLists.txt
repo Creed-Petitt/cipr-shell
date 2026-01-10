@@ -18,6 +18,12 @@ add_executable(cipr src/main.cpp
         src/Parser/Parser.h
         src/Interpreter/Interpreter.cpp
         src/Interpreter/Interpreter.h
-        src/Interpreter/RuntimeError.h
+        src/Interpreter/Function.cpp
+        src/Interpreter/Function.h
+        src/Interpreter/Callable.h
+        src/Common/Return.h
+        src/Common/RuntimeError.h
+        src/Native/NativeFunctions.h
+
         src/Environment/Environment.cpp
         src/Environment/Environment.h)
