@@ -6,17 +6,25 @@
 #define CIPR_CORE_H
 
 #include <string>
+#include "AST/Node/Node.h"
+#include "Interpreter/Interpreter.h"
 
 class Core {
 public:
+    Core();
+
+    void runFile(const std::string& path);
+    void runPrompt();
+    void run(const std::string& source);
+    void loadConfig();
+
+    static void error(int line, const std::string& message);
     static bool hadError;
 
-    static void runFile(const std::string& path);
-    static void runPrompt();
-    static void run(const std::string& source);
-    static void error(int line, const std::string& message);
-
 private:
+    Arena arena;
+    Interpreter interpreter;
+
     static void report(int line, const std::string& where, const std::string& message);
 };
 
