@@ -5,17 +5,12 @@
 #include "Interpreter.h"
 #include "Common/RuntimeError.h"
 #include "Common/Return.h"
-#include "Native/NativeFunctions.h"
+#include "Native/NativeRegistry.h"
 
 Interpreter::Interpreter(Arena& arena) : arena(arena) {
     globals = std::make_shared<Environment>();
     environment = globals;
-
-    globals->define("clock", std::make_shared<NativeClock>());
-    globals->define("run", std::make_shared<NativeRun>());
-    globals->define("read_file", std::make_shared<NativeReadFile>());
-    globals->define("write_file", std::make_shared<NativeWriteFile>());
-    globals->define("size", std::make_shared<NativeSize>());
+    NativeRegistry::registerAll(globals);
 }
 
 void Interpreter::interpret(const int rootIndex) {
