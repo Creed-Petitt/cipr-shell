@@ -16,6 +16,7 @@ void NativeRegistry::registerAll(const std::shared_ptr<Environment>& env) {
     env->define("include", std::make_shared<NativeInclude>());
     env->define("rand", std::make_shared<NativeRand>());
     env->define("sleep", std::make_shared<NativeSleep>());
+    env->define("exit", std::make_shared<NativeExit>());
 
     // File
     env->define("read_file", std::make_shared<NativeReadFile>());

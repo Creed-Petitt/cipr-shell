@@ -20,43 +20,71 @@
 #include <random>
 
 struct NativeTime final : Callable {
-    int arity() override { return 0; }
+    int arity() override {
+        return 0;
+    }
+
     Literal call(Interpreter&, std::vector<Literal>) override {
-        auto now = std::chrono::system_clock::now();
-        auto duration = now.time_since_epoch();
+        const auto now = std::chrono::system_clock::now();
+        const auto duration = now.time_since_epoch();
         return std::chrono::duration<double>(duration).count();
     }
-    std::string toString() override { return "<native fn time>"; }
+
+    std::string toString() override {
+        return "<native fn time>";
+    }
 };
 
 struct NativeRun final : Callable {
-    int arity() override { return 1; }
-    Literal call(Interpreter&, std::vector<Literal> args) override {
-        if (!std::holds_alternative<std::string>(args[0])) return std::monostate{};
-        std::string cmd = std::get<std::string>(args[0]);
+    int arity() override {
+        return 1;
+    }
+
+    Literal call(Interpreter&, const std::vector<Literal> args) override {
+        if (!std::holds_alternative<std::string>(args[0]))
+            return std::monostate{};
+        const auto cmd = std::get<std::string>(args[0]);
         std::array<char, 128> buf{};
         std::string res;
-        std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
-        if (!pipe) return std::string("Error: Pipe failed");
-        while (fgets(buf.data(), buf.size(), pipe.get()) != nullptr) res += buf.data();
+        const std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+        if (!pipe)
+            return std::string("Error: Pipe failed");
+
+        while (fgets(buf.data(), buf.size(), pipe.get()) != nullptr)
+            res += buf.data();
         return res;
     }
-    std::string toString() override { return "<native fn run>"; }
+
+    std::string toString() override {
+        return "<native fn run>";
+    }
 };
 
 struct NativeEnv final : Callable {
-    int arity() override { return 1; }
-    Literal call(Interpreter&, std::vector<Literal> args) override {
-        if (!std::holds_alternative<std::string>(args[0])) return std::monostate{};
+    int arity() override {
+        return 1;
+    }
+
+    Literal call(Interpreter&, const std::vector<Literal> args) override {
+        if (!std::holds_alternative<std::string>(args[0]))
+            return std::monostate{};
+
         const char* val = std::getenv(std::get<std::string>(args[0]).c_str());
-        if (val) return std::string(val);
+        if (val)
+            return std::string(val);
         return std::monostate{};
     }
-    std::string toString() override { return "<native fn env>"; }
+
+    std::string toString() override {
+        return "<native fn env>";
+    }
 };
 
 struct NativeCwd final : Callable {
-    int arity() override { return 0; }
+    int arity() override {
+        return 0;
+    }
+
     Literal call(Interpreter&, std::vector<Literal>) override {
         char cwd[PATH_MAX];
         if (getcwd(cwd, sizeof(cwd)) != nullptr) {
@@ -64,23 +92,37 @@ struct NativeCwd final : Callable {
         }
         return std::monostate{};
     }
-    std::string toString() override { return "<native fn cwd>"; }
+
+    std::string toString() override {
+        return "<native fn cwd>";
+    }
 };
 
 struct NativeCd final : Callable {
-    int arity() override { return 1; }
+    int arity() override {
+        return 1;
+    }
+
     Literal call(Interpreter&, const std::vector<Literal> args) override {
-        if (!std::holds_alternative<std::string>(args[0])) return false;
+        if (!std::holds_alternative<std::string>(args[0]))
+            return false;
         const std::string path = std::get<std::string>(args[0]);
         return chdir(path.c_str()) == 0;
     }
-    std::string toString() override { return "<native fn cd>"; }
+
+    std::string toString() override {
+        return "<native fn cd>";
+    }
 };
 
 struct NativeInclude final : Callable {
-    int arity() override { return 1; }
+    int arity() override {
+        return 1;
+    }
+
     Literal call(Interpreter& interpreter, std::vector<Literal> args) override {
-        if (!std::holds_alternative<std::string>(args[0])) return false;
+        if (!std::holds_alternative<std::string>(args[0]))
+            return false;
         auto filename = std::get<std::string>(args[0]);
         
         // 1. Check Local Path
@@ -95,7 +137,8 @@ struct NativeInclude final : Callable {
             }
         }
 
-        if (!file.is_open()) return false;
+        if (!file.is_open())
+            return false;
 
         std::stringstream buf;
         buf << file.rdbuf();
@@ -107,15 +150,25 @@ struct NativeInclude final : Callable {
         interpreter.interpret(root);
         return true;
     }
-    std::string toString() override { return "<native fn include>"; }
+
+    std::string toString() override {
+        return "<native fn include>";
+    }
 };
 
 struct NativeRand final : Callable {
-    int arity() override { return 1; }
+    int arity() override {
+        return 1;
+    }
+
     Literal call(Interpreter&, const std::vector<Literal> args) override {
-        if (!std::holds_alternative<double>(args[0])) return 0.0;
+        if (!std::holds_alternative<double>(args[0]))
+            return 0.0;
+
         const int max = static_cast<int>(std::get<double>(args[0]));
-        if (max <= 0) return 0.0;
+
+        if (max <= 0)
+            return 0.0;
         
         static std::random_device rd;
         static std::mt19937 gen(rd());
@@ -123,7 +176,10 @@ struct NativeRand final : Callable {
         
         return static_cast<double>(dis(gen));
     }
-    std::string toString() override { return "<native fn rand>"; }
+
+    std::string toString() override {
+        return "<native fn rand>";
+    }
 };
 
 struct NativeSleep final : Callable {
@@ -140,8 +196,27 @@ struct NativeSleep final : Callable {
         return std::monostate{};
     }
 
-    std::string toString() override {
+        std::string toString() override {
         return "<native fn sleep>";
+    }
+};
+
+struct NativeExit final : Callable {
+    int arity() override {
+        return 1;
+    }
+
+    Literal call(Interpreter&, const std::vector<Literal> args) override {
+        int code = 0;
+
+        if (std::holds_alternative<double>(args[0])) {
+            code = static_cast<int>(std::get<double>(args[0]));
+        }
+        std::exit(code);
+    }
+
+    std::string toString() override {
+        return "<native fn exit>";
     }
 };
 
